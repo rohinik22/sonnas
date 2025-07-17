@@ -129,7 +129,7 @@ export default function RestaurantPage() {
             </div>
 
             {mobileMenuOpen && (
-              <div className="md:hidden py-4 border-t border-gray-700 space-y-2">
+              <div className="md:block py-4 border-t border-gray-700 space-y-2">
                 {navItems.map((id) => (
                   <button
                     key={id}
