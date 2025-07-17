@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 const unsplash = (query: string) =>
   `https://source.unsplash.com/600x400/?${query.replace(/\s/g, "+")},food`;
@@ -113,28 +112,25 @@ export default function MenuSection() {
   const currentItems = menuItems.find((cat) => cat.category === activeCategory)?.items || [];
 
   return (
-    <motion.section
+    <section
       id="menu"
-      className="py-20 backdrop-blur-sm text-white"
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="py-20 backdrop-blur-sm text-white min-h-screen block w-full"
+      style={{ display: 'block', minHeight: '100vh', visibility: 'visible' }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-2">
+        <div className="text-center mb-8 sm:mb-12 px-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
             Explore Our <span className="text-red-600">Delicious Menu</span>
           </h2>
-          <p className="text-lg text-gray-300">Select a category to explore handcrafted dishes.</p>
+          <p className="text-base sm:text-lg text-gray-300">Select a category to explore handcrafted dishes.</p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-10">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-10 px-2">
           {menuItems.map(({ category }) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-5 py-2 rounded-full font-semibold transition-colors ${
+              className={`px-3 sm:px-5 py-2 rounded-full font-semibold transition-colors text-sm sm:text-base ${
                 activeCategory === category
                   ? "bg-red-600 text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-red-600 hover:text-white"
@@ -145,17 +141,13 @@ export default function MenuSection() {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {currentItems.map((item, index) => (
-            <motion.div
+            <div
               key={item.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
               className="bg-zinc-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl group transition-shadow flex flex-col"
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-32 sm:h-40 overflow-hidden">
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -163,25 +155,25 @@ export default function MenuSection() {
                   className="object-cover group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              <div className="p-4 flex flex-col justify-between flex-1">
+              <div className="p-3 sm:p-4 flex flex-col justify-between flex-1">
                 <div>
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className="text-xl font-bold text-white">{item.name}</h4>
-                    <span className="text-2xl font-bold text-red-400">₹{item.price}</span>
+                    <h4 className="text-lg sm:text-xl font-bold text-white">{item.name}</h4>
+                    <span className="text-xl sm:text-2xl font-bold text-red-400">₹{item.price}</span>
                   </div>
-                  <p className="text-gray-400 text-sm">{item.description}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">{item.description}</p>
                 </div>
                 <button
-                  className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-full transition-all"
+                  className="mt-3 sm:mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-full transition-all text-sm sm:text-base"
                   onClick={() => alert(`Added ${item.name} to cart`)}
                 >
                   Add to Cart
                 </button>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }
