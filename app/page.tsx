@@ -14,6 +14,7 @@ import ContactSection from "@/components/sections/ContactSection";
 import CartSidebar from "@/components/cart/CartSidebar";
 import OrderTrackingModal from "@/components/order/OrderTrackingModal";
 import LoginModal from "@/components/auth/LoginModal";
+import { Toaster } from "@/components/ui/toaster";
 import { CartProvider, useCart } from "@/contexts/CartContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { OrderProvider } from "@/contexts/OrderContext";
@@ -293,6 +294,9 @@ function RestaurantContent() {
         
         {/* Login Modal */}
         <LoginModal />
+        
+        {/* Toaster for notifications */}
+        <Toaster />
       </div>
     </div>
   );

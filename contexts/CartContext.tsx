@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useToast } from "@/hooks/use-toast";
 
 export interface CartItem {
   id: string;
@@ -28,8 +29,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { toast } = useToast();
 
   const addToCart = (item: Omit<CartItem, 'quantity'>): boolean => {
+    let isNewItem = false;
+    
     setCartItems(prevItems => {
       const existingItem = prevItems.find(cartItem => cartItem.id === item.id);
       
@@ -42,13 +46,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       } else {
         // If item doesn't exist, add with quantity 1
+        isNewItem = true;
         return [...prevItems, { ...item, quantity: 1 }];
       }
     });
     
-    // Briefly open cart to show item was added
-    setIsCartOpen(true);
-    setTimeout(() => setIsCartOpen(false), 2000);
+    // Show toast notification instead of opening sidebar
+    toast({
+      title: "Added to Cart! 🛒",
+      description: `${item.name} has been added to your cart.`,
+      duration: 3000,
+    });
     
     return true; // Successfully added to cart
   };
