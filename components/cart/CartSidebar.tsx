@@ -25,6 +25,7 @@ export default function CartSidebar() {
   const { user, isAuthenticated, setIsLoginModalOpen } = useAuth();
 
   const handleProceedToCheckout = async () => {
+    // Only require authentication for final order processing
     if (!isAuthenticated) {
       setIsLoginModalOpen(true);
       return;

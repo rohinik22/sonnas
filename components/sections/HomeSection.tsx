@@ -2,21 +2,12 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
 import ciguatera from "@/lib/fonts/ciguatera";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomeSection() {
-  const { isAuthenticated, setIsLoginModalOpen } = useAuth();
 
   const handleOrderNow = () => {
-    if (!isAuthenticated) {
-      // Open login modal if not authenticated
-      setIsLoginModalOpen(true);
-      // Store the intended action in localStorage so we can redirect after login
-      localStorage.setItem('postLoginAction', 'navigateToMenu');
-    } else {
-      // Navigate to menu section if already authenticated
-      scrollToMenu();
-    }
+    // Navigate directly to menu section without authentication check
+    scrollToMenu();
   };
 
   const scrollToMenu = () => {

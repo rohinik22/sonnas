@@ -3,7 +3,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { useAuth } from "@/contexts/AuthContext";
 
 // Food-specific image function with unique, high-quality images
 const getFoodImageUrl = (itemName: string, category: string) => {
@@ -184,7 +183,6 @@ const menuItems = [
 export default function MenuSection() {
   const [activeCategory, setActiveCategory] = useState(menuItems[0].category);
   const { addToCart, cartItems, updateQuantity } = useCart();
-  const { isAuthenticated, setIsLoginModalOpen } = useAuth();
   const currentItems = menuItems.find((cat) => cat.category === activeCategory)?.items || [];
 
   // Function to get quantity of item in cart
@@ -193,14 +191,8 @@ export default function MenuSection() {
     return cartItem ? cartItem.quantity : 0;
   };
 
-  // Function to handle add to cart with authentication check
+  // Function to handle add to cart without authentication check
   const handleAddToCart = (item: any) => {
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
-      return;
-    }
-
     const cartItem = {
       id: `${item.name}-${activeCategory}`,
       name: item.name,
@@ -212,12 +204,8 @@ export default function MenuSection() {
     addToCart(cartItem);
   };
 
-  // Function to handle quantity updates (also requires authentication)
+  // Function to handle quantity updates without authentication check
   const handleQuantityUpdate = (itemName: string, newQuantity: number) => {
-    if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
-      return;
-    }
     updateQuantity(`${itemName}-${activeCategory}`, newQuantity);
   };
 
