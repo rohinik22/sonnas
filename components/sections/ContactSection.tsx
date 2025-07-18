@@ -3,7 +3,13 @@
 import { Contact2 } from "@/components/ui/contact-2"
 import { motion } from "framer-motion"
 
-export default function ContactSection() {
+interface ContactSectionProps {
+  prefilledSubject?: string
+  prefilledName?: string
+  prefilledEmail?: string
+}
+
+export default function ContactSection({ prefilledSubject, prefilledName, prefilledEmail }: ContactSectionProps) {
   return (
     <section id="contact-form" className="py-20 backdrop-blur-sm text-white">
       <motion.div
@@ -15,9 +21,12 @@ export default function ContactSection() {
         <Contact2
           title="Get In Touch"
           description="We'd love to hear from you! Send us a message and we'll respond as soon as possible."
-          phone="+91 9113231424"
+          phone="+91 "
           email="info@sonnas.com"
           web={{ label: "sonnasrestaurant.com", url: "#" }}
+          prefilledSubject={prefilledSubject}
+          prefilledName={prefilledName}
+          prefilledEmail={prefilledEmail}
         />
       </motion.div>
     </section>

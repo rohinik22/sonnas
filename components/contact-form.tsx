@@ -2,19 +2,35 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export function ContactForm() {
+interface ContactFormProps {
+  prefilledSubject?: string
+  prefilledName?: string
+  prefilledEmail?: string
+}
+
+export function ContactForm({ prefilledSubject, prefilledName, prefilledEmail }: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   })
+
+  // Update form data when props change
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      name: prefilledName || prev.name,
+      email: prefilledEmail || prev.email,
+      subject: prefilledSubject || prev.subject,
+    }))
+  }, [prefilledSubject, prefilledName, prefilledEmail])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

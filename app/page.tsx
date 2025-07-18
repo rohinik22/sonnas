@@ -1,7 +1,7 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { Menu, X, Cake, BookOpen, Utensils, CalendarCheck, ChefHat } from "lucide-react";
+import { Menu, X, Cake, BookOpen, Utensils, CalendarCheck, ChefHat, ShoppingCart, User, LogOut, Package } from "lucide-react";
 import Image from "next/image";
 import ciguatera from "@/lib/fonts/ciguatera";
 
@@ -11,12 +11,27 @@ import HomeSection from "@/components/sections/HomeSection";
 import AboutSection from "@/components/sections/AboutSection";
 import MenuSection from "@/components/sections/MenuSection";
 import ContactSection from "@/components/sections/ContactSection";
+import CartSidebar from "@/components/cart/CartSidebar";
+import OrderTrackingModal from "@/components/order/OrderTrackingModal";
+import LoginModal from "@/components/auth/LoginModal";
+import { CartProvider, useCart } from "@/contexts/CartContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { OrderProvider } from "@/contexts/OrderContext";
 
 const navItems = ["home", "about", "service", "menu", "contact-form"];
 
-export default function RestaurantPage() {
+function RestaurantContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isOrderTrackingOpen, setIsOrderTrackingOpen] = useState(false);
+  const [contactFormData, setContactFormData] = useState({
+    subject: "",
+    name: "",
+    email: "",
+  });
+  const { getTotalItems, setIsCartOpen } = useCart();
+  const { user, isAuthenticated, logout, setIsLoginModalOpen } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +53,31 @@ export default function RestaurantPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     setMobileMenuOpen(false);
   };
+
+  const handleServiceEnquire = (serviceTitle: string) => {
+    // Set the subject for the contact form
+    const subject = `Enquiry about ${serviceTitle}`;
+    setContactFormData({
+      subject,
+      name: isAuthenticated ? user?.name || "" : "",
+      email: isAuthenticated ? user?.email || "" : "",
+    });
+    
+    // Scroll to contact form
+    scrollToSection("contact-form");
+  };
+
+  // Clear contact form data when section changes (optional)
+  useEffect(() => {
+    if (activeSection !== "contact-form" && contactFormData.subject) {
+      // Clear after a delay to ensure user has seen the pre-filled data
+      const timer = setTimeout(() => {
+        setContactFormData({ subject: "", name: "", email: "" });
+      }, 10000); // Clear after 10 seconds of leaving contact section
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeSection, contactFormData.subject]);
 
   const services = [
     {
@@ -115,17 +155,80 @@ export default function RestaurantPage() {
                     {id.replace("-form", "")}
                   </button>
                 ))}
-                <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold">
-                  Order Now
-                </button>
               </div>
 
-              <button
-                className="md:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
+              <div className="flex items-center space-x-4">
+                {/* Order Tracking */}
+                <button
+                  onClick={() => setIsOrderTrackingOpen(true)}
+                  className="relative p-2 text-gray-300 hover:text-yellow-500 transition-colors"
+                  title="Track Orders"
+                >
+                  <Package className="h-6 w-6" />
+                </button>
+
+                {/* Cart Icon */}
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative p-2 text-gray-300 hover:text-red-600 transition-colors"
+                >
+                  <ShoppingCart className="h-6 w-6" />
+                  {getTotalItems() > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {getTotalItems()}
+                    </span>
+                  )}
+                </button>
+
+                {/* User Menu */}
+                <div className="relative">
+                  {isAuthenticated ? (
+                    <div>
+                      <button
+                        onClick={() => setShowUserMenu(!showUserMenu)}
+                        className="flex items-center space-x-2 p-2 text-gray-300 hover:text-green-600 transition-colors"
+                      >
+                        <User className="h-5 w-5" />
+                        <span className="hidden md:block text-sm">{user?.name}</span>
+                      </button>
+                      
+                      {showUserMenu && (
+                        <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+                          <div className="p-3 border-b border-gray-700">
+                            <p className="text-white font-medium">{user?.name}</p>
+                            <p className="text-gray-400 text-sm">{user?.email}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              logout();
+                              setShowUserMenu(false);
+                            }}
+                            className="w-full flex items-center space-x-2 p-3 text-gray-300 hover:text-red-600 hover:bg-gray-700 transition-colors"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setIsLoginModalOpen(true)}
+                      className="flex items-center space-x-2 p-2 text-gray-300 hover:text-green-600 transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                      <span className="hidden md:block text-sm">Login</span>
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  className="md:hidden"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </button>
+              </div>
             </div>
 
             {mobileMenuOpen && (
@@ -139,8 +242,15 @@ export default function RestaurantPage() {
                     {id.replace("-form", "")}
                   </button>
                 ))}
-                <button className="w-full bg-red-600 text-white px-6 py-2 rounded-full">
-                  Order Now
+                <button
+                  onClick={() => {
+                    setIsOrderTrackingOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex w-full text-left py-2 text-gray-300 hover:text-yellow-500 items-center space-x-2"
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Track Orders</span>
                 </button>
               </div>
             )}
@@ -160,13 +270,42 @@ export default function RestaurantPage() {
               description="Explore our range of services designed to bring joy and flavor to every occasion."
               services={services}
               className="bg-transparent"
+              onServiceEnquire={handleServiceEnquire}
             />
           </div>
         </section>
 
         <MenuSection />
-        <ContactSection />
+        <ContactSection 
+          prefilledSubject={contactFormData.subject}
+          prefilledName={contactFormData.name}
+          prefilledEmail={contactFormData.email}
+        />
+        
+        {/* Cart Sidebar */}
+        <CartSidebar />
+        
+        {/* Order Tracking Modal */}
+        <OrderTrackingModal 
+          isOpen={isOrderTrackingOpen} 
+          onClose={() => setIsOrderTrackingOpen(false)} 
+        />
+        
+        {/* Login Modal */}
+        <LoginModal />
       </div>
     </div>
+  );
+}
+
+export default function RestaurantPage() {
+  return (
+    <AuthProvider>
+      <OrderProvider>
+        <CartProvider>
+          <RestaurantContent />
+        </CartProvider>
+      </OrderProvider>
+    </AuthProvider>
   );
 }

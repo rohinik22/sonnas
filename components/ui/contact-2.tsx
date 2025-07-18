@@ -1,7 +1,10 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { useState, useEffect } from "react"
 
 interface Contact2Props {
   title?: string
@@ -9,6 +12,9 @@ interface Contact2Props {
   phone?: string
   email?: string
   web?: { label: string; url: string }
+  prefilledSubject?: string
+  prefilledName?: string
+  prefilledEmail?: string
 }
 
 export const Contact2 = ({
@@ -17,7 +23,53 @@ export const Contact2 = ({
   phone = "(555) 123-4567", // Updated phone
   email = "info@sonnas.com", // Updated email
   web = { label: "sonnasrestaurant.com", url: "#" }, // Updated web
+  prefilledSubject,
+  prefilledName,
+  prefilledEmail,
 }: Contact2Props) => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+
+  // Update form data when props change
+  useEffect(() => {
+    if (prefilledName) {
+      const nameParts = prefilledName.split(' ')
+      setFormData(prev => ({
+        ...prev,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(' ') || "",
+      }))
+    }
+    if (prefilledEmail) {
+      setFormData(prev => ({ ...prev, email: prefilledEmail }))
+    }
+    if (prefilledSubject) {
+      setFormData(prev => ({ ...prev, subject: prefilledSubject }))
+    }
+  }, [prefilledSubject, prefilledName, prefilledEmail])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted:", formData)
+    alert("Thank you for your message! We will get back to you soon.")
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      subject: "",
+      message: "",
+    })
+  }
   return (
     <section className="py-32">
       <div className="container">
@@ -49,23 +101,29 @@ export const Contact2 = ({
               </ul>
             </div>
           </div>
-          <div className="mx-auto flex max-w-screen-md flex-col gap-6 rounded-lg border p-10 bg-gray-800 border-gray-700">
+          <form onSubmit={handleSubmit} className="mx-auto flex max-w-screen-md flex-col gap-6 rounded-lg border p-10 bg-gray-800 border-gray-700">
             <div className="flex gap-4">
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="firstname">First Name</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   type="text"
-                  id="firstname"
+                  id="firstName"
+                  name="firstName"
                   placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
                   className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="lastname">Last Name</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   type="text"
-                  id="lastname"
+                  id="lastName"
+                  name="lastName"
                   placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
@@ -75,7 +133,10 @@ export const Contact2 = ({
               <Input
                 type="email"
                 id="email"
+                name="email"
                 placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
                 className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
@@ -84,7 +145,10 @@ export const Contact2 = ({
               <Input
                 type="text"
                 id="subject"
+                name="subject"
                 placeholder="Subject"
+                value={formData.subject}
+                onChange={handleChange}
                 className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
@@ -93,11 +157,14 @@ export const Contact2 = ({
               <Textarea
                 placeholder="Type your message here."
                 id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Send Message</Button>
-          </div>
+            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white">Send Message</Button>
+          </form>
         </div>
       </div>
     </section>

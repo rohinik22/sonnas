@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react" // Import LucideIcon type
+import { Button } from "@/components/ui/button"
 
 export interface ServiceCardProps {
   title: string
@@ -7,6 +8,7 @@ export interface ServiceCardProps {
   icon: LucideIcon // Use LucideIcon for the icon prop
   href?: string
   className?: string
+  onEnquire?: () => void
 }
 
 export function ServiceCard({
@@ -15,6 +17,7 @@ export function ServiceCard({
   icon: Icon, // Destructure and rename to Icon for JSX rendering
   href,
   className,
+  onEnquire,
 }: ServiceCardProps) {
   const Card = href ? "a" : "div"
   return (
@@ -37,6 +40,18 @@ export function ServiceCard({
         <h3 className="text-md font-semibold leading-none">{title}</h3>
       </div>
       <p className="sm:text-md mt-4 text-sm text-muted-foreground">{description}</p>
+      
+      {onEnquire && (
+        <div className="mt-4 pt-2">
+          <Button 
+            onClick={onEnquire}
+            className="w-full bg-red-600 hover:bg-red-700 text-white"
+            size="sm"
+          >
+            Enquire Now
+          </Button>
+        </div>
+      )}
     </Card>
   )
 }
