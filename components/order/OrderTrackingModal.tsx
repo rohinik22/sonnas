@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Search, Clock, CheckCircle, Truck, Package, X } from 'lucide-react';
 import { useOrder } from '@/contexts/OrderContext';
-import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 
 interface OrderTrackingModalProps {
@@ -13,8 +12,7 @@ interface OrderTrackingModalProps {
 export default function OrderTrackingModal({ isOpen, onClose }: OrderTrackingModalProps) {
   const [orderId, setOrderId] = useState('');
   const [searchedOrder, setSearchedOrder] = useState<any>(null);
-  const { getOrderById, getUserOrders } = useOrder();
-  const { user, isAuthenticated } = useAuth();
+  const { getOrderById, getAllOrders } = useOrder();
 
   if (!isOpen) return null;
 
@@ -25,7 +23,7 @@ export default function OrderTrackingModal({ isOpen, onClose }: OrderTrackingMod
     }
   };
 
-  const userOrders = isAuthenticated ? getUserOrders(user?.id || '') : [];
+  const allOrders = getAllOrders();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -118,7 +116,7 @@ export default function OrderTrackingModal({ isOpen, onClose }: OrderTrackingMod
       <div className="absolute inset-4 md:inset-8 lg:inset-16 bg-gray-900 rounded-lg shadow-xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <h2 className="text-2xl font-bold text-white">Track Your Order</h2>
+          <h2 className="text-2xl font-bold text-white">Track Orders</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-800 rounded-full transition-colors"
@@ -162,12 +160,12 @@ export default function OrderTrackingModal({ isOpen, onClose }: OrderTrackingMod
             )}
           </div>
 
-          {/* User Orders Section */}
-          {isAuthenticated && userOrders.length > 0 && (
+          {/* All Orders Section */}
+          {allOrders.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Your Recent Orders</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">All Orders</h3>
               <div className="space-y-4">
-                {userOrders.slice(0, 5).map((order) => (
+                {allOrders.slice(0, 10).map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}
               </div>
@@ -175,19 +173,11 @@ export default function OrderTrackingModal({ isOpen, onClose }: OrderTrackingMod
           )}
 
           {/* No Orders Message */}
-          {isAuthenticated && userOrders.length === 0 && !orderId && (
+          {allOrders.length === 0 && !orderId && (
             <div className="text-center py-8">
               <Package className="h-16 w-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">No orders found</p>
               <p className="text-gray-500 text-sm">Place your first order to see it here!</p>
-            </div>
-          )}
-
-          {/* Not Logged In Message */}
-          {!isAuthenticated && (
-            <div className="text-center py-8">
-              <p className="text-gray-400 text-lg mb-2">Login to view your order history</p>
-              <p className="text-gray-500 text-sm">Or use the search above to track any order with Order ID</p>
             </div>
           )}
         </div>

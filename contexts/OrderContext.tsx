@@ -17,16 +17,36 @@ export interface Order {
 
 interface OrderContextType {
   orders: Order[];
-  createOrder: (items: CartItem[], total: number, userInfo: { id: string; name: string; email: string; phone?: string }) => Promise<string>;
+  createOrder: (items: CartItem[], total: number, userInfo?: { id: string; name: string; email: string; phone?: string }) => Promise<string>;
   getOrderById: (orderId: string) => Order | undefined;
   getUserOrders: (userId: string) => Order[];
+  getAllOrders: () => Order[];
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>(() => {
+    // Load orders from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      const storedOrders = localStorage.getItem('sonnas-orders');
+      if (storedOrders) {
+        try {
+          const parsedOrders = JSON.parse(storedOrders);
+          return parsedOrders.map((order: any) => ({
+            ...order,
+            createdAt: new Date(order.createdAt),
+            estimatedDelivery: order.estimatedDelivery ? new Date(order.estimatedDelivery) : undefined,
+          }));
+        } catch (error) {
+          console.error('Error parsing stored orders:', error);
+          return [];
+        }
+      }
+    }
+    return [];
+  });
 
   const generateOrderId = (): string => {
     return 'ORD-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
@@ -35,18 +55,26 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const createOrder = async (
     items: CartItem[], 
     total: number, 
-    userInfo: { id: string; name: string; email: string; phone?: string }
+    userInfo?: { id: string; name: string; email: string; phone?: string }
   ): Promise<string> => {
     const orderId = generateOrderId();
     const estimatedDelivery = new Date();
     estimatedDelivery.setMinutes(estimatedDelivery.getMinutes() + 30); // 30 minutes from now
 
+    // Use guest user info if not provided
+    const finalUserInfo = userInfo || {
+      id: 'guest-' + Date.now().toString(36),
+      name: 'Guest User',
+      email: 'guest@sonnas.com',
+      phone: undefined
+    };
+
     const newOrder: Order = {
       id: orderId,
-      userId: userInfo.id,
-      userEmail: userInfo.email,
-      userName: userInfo.name,
-      userPhone: userInfo.phone,
+      userId: finalUserInfo.id,
+      userEmail: finalUserInfo.email,
+      userName: finalUserInfo.name,
+      userPhone: finalUserInfo.phone,
       items: [...items],
       total,
       status: 'confirmed',
@@ -78,6 +106,12 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const getAllOrders = (): Order[] => {
+    return orders.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  };
+
   const updateOrderStatus = (orderId: string, status: Order['status']) => {
     setOrders(prev => prev.map(order => 
       order.id === orderId ? { ...order, status } : order
@@ -96,6 +130,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     createOrder,
     getOrderById,
     getUserOrders,
+    getAllOrders,
     updateOrderStatus,
   };
 

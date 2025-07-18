@@ -25,26 +25,23 @@ export default function CartSidebar() {
   const { user, isAuthenticated, setIsLoginModalOpen } = useAuth();
 
   const handleProceedToCheckout = async () => {
-    // Only require authentication for final order processing
-    if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
-      return;
-    }
-
     if (cartItems.length === 0) return;
 
     setIsProcessingOrder(true);
     
     try {
+      // Create order with user info if authenticated, otherwise as guest
+      const userInfo = isAuthenticated && user ? {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone
+      } : undefined;
+
       const orderId = await createOrder(
         cartItems,
         getTotalPrice(),
-        {
-          id: user!.id,
-          name: user!.name,
-          email: user!.email,
-          phone: user!.phone
-        }
+        userInfo
       );
       
       setOrderSuccess(orderId);
@@ -102,7 +99,11 @@ export default function CartSidebar() {
               <h3 className="text-green-500 text-xl font-semibold mb-2">Order Confirmed! 🎉</h3>
               <p className="text-gray-300 mb-2">Order ID: <span className="font-mono text-green-400">{orderSuccess}</span></p>
               <p className="text-gray-400 text-sm mb-4">Your order has been successfully placed!</p>
-              <p className="text-gray-500 text-xs">Track your order anytime using the Order ID</p>
+              <p className="text-gray-500 text-xs">
+                {isAuthenticated 
+                  ? "Track your order anytime using the Order ID" 
+                  : "Save this Order ID to track your order later"}
+              </p>
             </div>
           ) : cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
