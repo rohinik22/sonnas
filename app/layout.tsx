@@ -7,7 +7,7 @@ import ciguatera from "@/lib/fonts/ciguatera"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Sonna's - Authentic Italian Restaurant",
+  title: "Sonna's",
   description:
     "Experience authentic Italian cuisine with our handcrafted pizzas, fresh pasta, and traditional recipes.",
     generator: 'v0.dev'
